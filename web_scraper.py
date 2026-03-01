@@ -117,7 +117,7 @@ def write_csv(items: Iterable[ScrapedItem], output_path: Path) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Scrape a webpage by simple selector")
-    parser.add_argument("--url", required=True, help="Target URL to scrape")
+    parser.add_argument("--url", help="Target URL to scrape (if omitted, you'll be prompted)")
     parser.add_argument("--selector", required=True, help="Selector: tag, .class, #id, tag.class, or tag#id")
     parser.add_argument("--attr", help="Optional attribute to extract instead of text, e.g. href")
     parser.add_argument("--contains", help="Optional case-insensitive text filter")
@@ -129,7 +129,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    html = fetch_html(args.url)
+    url = args.url or input("Enter the page URL to scrape: ").strip()
+    if not url:
+        raise SystemExit("URL is required. Pass --url or provide one when prompted.")
+
+    html = fetch_html(url)
     items = scrape(html=html, selector=args.selector, attr=args.attr, contains=args.contains, limit=args.limit)
 
     if args.format == "json":
